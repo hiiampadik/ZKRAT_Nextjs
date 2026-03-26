@@ -2,7 +2,7 @@
 import * as THREE from 'three'
 import { useRef, useMemo, useState } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useGLTF, Environment, Lightformer, Html } from '@react-three/drei'
+import { useGLTF, useTexture, Environment, Lightformer, Html } from '@react-three/drei'
 import { CuboidCollider, Physics, RigidBody } from '@react-three/rapier'
 import { EffectComposer, N8AO } from '@react-three/postprocessing'
 
@@ -134,10 +134,11 @@ function Connector({
 
 function Model({ children, color = '#111', roughness = 0.85 }: any) {
   const ref = useRef<any>(null)
-  const { nodes, materials } = useGLTF('/c-transformed.glb') as any
+  const { nodes } = useGLTF('/c-transformed.glb') as any
+  const texture = useTexture('/screen.jpg')
   return (
     <mesh ref={ref} castShadow receiveShadow scale={10} geometry={nodes.connector.geometry}>
-      <meshStandardMaterial color={color} metalness={0.2} roughness={roughness} map={materials.base.map} />
+      <meshStandardMaterial color="#ffffff" metalness={0.9} roughness={0.4} map={texture} />
       {children}
     </mesh>
   )
