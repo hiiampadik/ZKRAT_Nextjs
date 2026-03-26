@@ -1,9 +1,11 @@
 import React from 'react';
 import Head from "next/head";
 
+interface LayoutProps {
+    children: React.ReactNode;
+}
 
-export default function Layout(
-    {children}) {
+export default function Layout({ children }: LayoutProps) {
 
     const title = 'Zkrat Kolektiv'
     const description = "Zkrat is collective of multidisciplinatory artists based in Brno (CZE)"
@@ -82,4 +84,4 @@ export default function Layout(
             </main>
         </>
     );
-};
+}
