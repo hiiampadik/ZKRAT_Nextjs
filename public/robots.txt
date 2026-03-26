@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://zkratkolektiv.com
+
+# Sitemaps
+Sitemap: https://zkratkolektiv.com/sitemap.xml
