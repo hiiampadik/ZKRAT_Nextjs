@@ -1,5 +1,8 @@
 import styles from "../styles/Home.module.scss";
 import Layout from "../components/Layout";
+import dynamic from "next/dynamic";
+
+const Scene = dynamic(() => import("../components/Scene"), { ssr: false });
 
 export default function Home() {
 
@@ -19,6 +22,7 @@ export default function Home() {
                   Visualizations
               </p>
             </div>
+          <Scene />
     </Layout>
   );
 }

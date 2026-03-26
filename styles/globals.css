@@ -23,6 +23,7 @@ body, main {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  position: relative;
 }
 
 @font-face {
