@@ -8,21 +8,22 @@ export default function Home() {
 
   return (
     <Layout>
-          <div className={styles.homepageTitle}>
-              <a href='https://instagram.com/zkrat.kolektiv'>
-                <h1>
-                    @zkrat.kolektiv
-                </h1>
-                <span className={styles.ig}>IG</span>
-              </a>
-              <p>
-                  Interactive Installations
-              </p>
-              <p>
-                  Visualizations
-              </p>
-            </div>
-          <Scene />
+        <div className={styles.homepageTitle}>
+            <h1>
+                zkrat.kolektiv
+            </h1>
+            {/*<a href='https://instagram.com/zkrat.kolektiv'>*/}
+
+            {/*    <span className={styles.ig}>IG</span>*/}
+            {/*</a>*/}
+            {/*<p>*/}
+            {/*    Interactive Installations*/}
+            {/*</p>*/}
+            {/*<p>*/}
+            {/*    Visualizations*/}
+            {/*</p>*/}
+        </div>
+        <Scene/>
     </Layout>
   );
 }
