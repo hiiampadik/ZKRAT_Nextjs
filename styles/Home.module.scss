@@ -10,19 +10,14 @@
   width: 100%;
   height: 100%;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  user-select: none;
-  position: relative;
-  z-index: 1;
 
-  opacity: 0;
   animation: appear 1s ease-out forwards;
   animation-delay: 0.5s;
   animation-iteration-count: 1;
-  padding-bottom: 10vh;
-  padding-bottom: 10dvh;
+
+  padding: 12px;
 
   h1, p, a, .underline {
     font-size: 10vw;
@@ -31,13 +26,7 @@
     font-family: Rader, sans-serif;
     font-weight: bold;
     font-style: normal;
-    line-height: 0.9em;
-    height: 0.9em;
     font-feature-settings: "ss02";
-
-    @media (max-width: 991px) {
-      font-size: 10vw;
-    }
   }
 
   .underline, a {
@@ -45,19 +34,8 @@
   }
 
   .ig{
-    position: absolute;
-    right: -35px;
-    bottom: 0.3vw * 0.7;
-    font-size: 18px;
-    line-height: 0.9em;
-    height: 0.9em;
     font-feature-settings: "ss11";
 
-    @media (max-width: 991px) {
-      bottom: 0.3vw;
-      font-size: 14px;
-      right: -25px;
-    }
   }
 
   a {

@@ -1,17 +1,27 @@
 // @ts-nocheck
 import * as THREE from 'three'
-import { useRef, useMemo, useState, useCallback } from 'react'
+import { useRef, useMemo, useState, useCallback, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useTexture, Environment, Lightformer } from '@react-three/drei'
+import { Environment, Lightformer } from '@react-three/drei'
 import { CapsuleCollider, Physics, RigidBody } from '@react-three/rapier'
 import { EffectComposer, N8AO } from '@react-three/postprocessing'
 import styles from '../styles/Home.module.scss'
+import { ProjectItem } from '../sanity/queries'
 
-const CONNECTOR_SCALE = 7
-const CONNECTOR_COUNT = 7
+const CONNECTOR_SCALE = 6
 
-const connectorStyle = { color: '#111', roughness: 0.85 }
-const shuffle = () => Array.from({ length: CONNECTOR_COUNT }, () => ({ ...connectorStyle }))
+function useDataUrlTexture(dataUrl: string | null) {
+  const [texture, setTexture] = useState<THREE.Texture | null>(null)
+  useEffect(() => {
+    if (!dataUrl) return
+    const loader = new THREE.TextureLoader()
+    loader.load(dataUrl, (tex) => {
+      tex.colorSpace = THREE.SRGBColorSpace
+      setTexture(tex)
+    })
+  }, [dataUrl])
+  return texture
+}
 
 function Connector({
   position,
@@ -35,12 +45,15 @@ function Connector({
   const worldPos = useMemo(() => new THREE.Vector3(), [])
 
   useFrame(({ mouse, viewport, camera, size }) => {
-    // Attract toward center — weaken force when close to avoid jitter
-    const t = api.current?.translation()
-    if (t) {
-      const dist = Math.sqrt(t.x * t.x + t.y * t.y + t.z * t.z)
-      const strength = dist > 1 ? 0.2 : dist * 0.1
-      api.current.applyImpulse(vec.set(-t.x * strength, -t.y * strength, -t.z * strength))
+    // Attract toward center — skip during drag, weaken near center to avoid jitter
+    if (!dragging.current) {
+      const t = api.current?.translation()
+      if (t) {
+        const dist = Math.sqrt(t.x * t.x + t.y * t.y + t.z * t.z)
+        // Strong pull far away, fades to near-zero close to center
+        const strength = dist > 2 ? 1.0 : Math.max(0, (dist - 0.5)) * 0.4
+        api.current.applyImpulse(vec.set(-t.x * strength, -t.y * strength, -t.z * strength))
+      }
     }
 
     // Project world position to screen for label overlay
@@ -120,18 +133,26 @@ function Connector({
   )
 }
 
-function Model({ hovered = false }: any): any {
-  const texture = useTexture('/screen.jpg')
+function Model({ hovered = false, coverUrl }: any): any {
+  const texture = useDataUrlTexture(coverUrl)
+  const matRef = useRef<any>(null)
+
+  useEffect(() => {
+    if (matRef.current && texture) {
+      matRef.current.map = texture
+      matRef.current.needsUpdate = true
+    }
+  }, [texture])
+
   return (
     <mesh castShadow receiveShadow>
       <capsuleGeometry args={[0.05 * CONNECTOR_SCALE, 0.12 * CONNECTOR_SCALE, 16, 32]} />
-      <meshStandardMaterial color={hovered ? '#fff' : '#999'}  metalness={hovered ? 0.7 : 0.2} roughness={hovered ? 0.6 : 0.4} map={texture} />
+      <meshStandardMaterial ref={matRef} color={hovered ? '#fff' : '#999'} metalness={hovered ? 0.7 : 0.2} roughness={hovered ? 0.6 : 0.4} />
     </mesh>
   )
 }
 
-export default function Scene() {
-  const connectors = useMemo(() => shuffle(), [])
+export default function Scene({ projects = [] }: { projects?: ProjectItem[] }) {
   const [labels, setLabels] = useState<Record<number, { x: number; y: number }>>({})
   const [hoveredSet, setHoveredSet] = useState<Set<number>>(new Set())
 
@@ -181,8 +202,8 @@ export default function Scene() {
         <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={3} castShadow />
         <spotLight position={[-10, -10, 10]} angle={0.3} penumbra={1} intensity={2} />
         <Physics gravity={[0, 0, 0]}>
-          {connectors.map((props, i) => (
-            <Connector key={i} index={i + 1} onScreenUpdate={onScreenUpdate} onHover={onHover} onDragChange={onDragChange} {...props} />
+          {projects.map((project, i) => (
+            <Connector key={project._id} index={i + 1} coverUrl={project.coverUrl} onScreenUpdate={onScreenUpdate} onHover={onHover} onDragChange={onDragChange} />
           ))}
         </Physics>
         <EffectComposer disableNormalPass multisampling={8}>
@@ -207,6 +228,8 @@ export default function Scene() {
           } else {
             if (!hoveredSet.has(i)) return null
           }
+          const project = projects[i - 1]
+          if (!project) return null
           return (
               <div
                   key={i}
@@ -218,9 +241,9 @@ export default function Scene() {
                     WebkitBackdropFilter: 'blur(5px)',
                   }}
               >
-                <p>Lorem Ipsum</p>
-                <p>2025</p>
-                <p>{i}</p>
+                <p>{project.titleCs}</p>
+                <p>{project.titleEn}</p>
+                <p>{project.year}</p>
               </div>
           )
         })}

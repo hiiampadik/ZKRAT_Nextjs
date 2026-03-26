@@ -1,29 +1,32 @@
 import styles from "../styles/Home.module.scss";
 import Layout from "../components/Layout";
 import dynamic from "next/dynamic";
+import { getProjects, ProjectItem } from "../sanity/queries";
+import { GetStaticProps } from "next";
 
 const Scene = dynamic(() => import("../components/Scene"), { ssr: false });
 
-export default function Home() {
+interface HomeProps {
+  projects: ProjectItem[];
+}
 
+export const getStaticProps: GetStaticProps<HomeProps> = async () => {
+  const projects = await getProjects();
+  return {
+    props: { projects },
+    revalidate: 60,
+  };
+};
+
+export default function Home({ projects }: HomeProps) {
   return (
     <Layout>
         <div className={styles.homepageTitle}>
             <h1>
                 zkrat.kolektiv
             </h1>
-            {/*<a href='https://instagram.com/zkrat.kolektiv'>*/}
-
-            {/*    <span className={styles.ig}>IG</span>*/}
-            {/*</a>*/}
-            {/*<p>*/}
-            {/*    Interactive Installations*/}
-            {/*</p>*/}
-            {/*<p>*/}
-            {/*    Visualizations*/}
-            {/*</p>*/}
         </div>
-        <Scene/>
+        <Scene projects={projects} />
     </Layout>
   );
 }
