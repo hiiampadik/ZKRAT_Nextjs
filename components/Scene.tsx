@@ -1,11 +1,10 @@
 // @ts-nocheck
 import * as THREE from 'three'
-import React, { useRef, useMemo, useState, useEffect } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { useRef, useMemo, useState } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { useGLTF, Environment, Lightformer, Html } from '@react-three/drei'
-import { CuboidCollider, BallCollider, Physics, RigidBody } from '@react-three/rapier'
+import { CuboidCollider, Physics, RigidBody } from '@react-three/rapier'
 import { EffectComposer, N8AO } from '@react-three/postprocessing'
-import { easing } from 'maath'
 
 const connectorStyle = { color: '#111', roughness: 0.85 }
 const shuffle = () => [
@@ -29,7 +28,6 @@ function Connector({
   const dragging = useRef(false)
   const dragStart = useRef(new THREE.Vector2())
   const wasDragged = useRef(false)
-  const prevMouse = useRef(new THREE.Vector2())
   const velocity = useRef(new THREE.Vector2())
 
   useFrame(({ mouse, viewport, clock }) => {
@@ -38,15 +36,17 @@ function Connector({
     api.current?.applyImpulse(vec.copy(api.current.translation()).negate().multiplyScalar(0.2))
 
     if (dragging.current) {
-      const x = (mouse.x * viewport.width) / 2
-      const y = (mouse.y * viewport.height) / 2
+      const targetX = (mouse.x * viewport.width) / 2
+      const targetY = (mouse.y * viewport.height) / 2
       const translation = api.current?.translation()
       if (translation) {
-        // Track velocity for release impulse
-        velocity.current.set(x - prevMouse.current.x, y - prevMouse.current.y)
-        prevMouse.current.set(x, y)
-        // Move object to mouse position (keep z)
-        api.current.setNextKinematicTranslation({ x, y, z: translation.z })
+        // Lerp toward mouse — lower = softer spring
+        const springFactor = 0.12
+        const newX = translation.x + (targetX - translation.x) * springFactor
+        const newY = translation.y + (targetY - translation.y) * springFactor
+        // Track velocity from actual movement for release impulse
+        velocity.current.set(newX - translation.x, newY - translation.y)
+        api.current.setNextKinematicTranslation({ x: newX, y: newY, z: translation.z })
       }
     }
   })
@@ -59,7 +59,6 @@ function Connector({
     dragStart.current.set(e.clientX, e.clientY)
     // Switch to kinematic so we can move it directly
     api.current?.setBodyType(2) // kinematicPosition
-    const { viewport, mouse } = e.camera ? e : { viewport: { width: 1, height: 1 }, mouse: { x: 0, y: 0 } }
   }
 
   const onPointerUp = (e: any) => {
@@ -107,7 +106,7 @@ function Connector({
       </group>
       {hovered && index !== undefined && (
         <Html
-          position={[1.2, 1.2, 0]}
+          position={[0.8, 0.8, 0]}
           style={{
             pointerEvents: 'none',
             userSelect: 'none',
@@ -117,14 +116,12 @@ function Connector({
           <div
             style={{
               color: 'white',
-              fontSize: '14px',
+              fontSize: '32px',
               fontFamily: 'Rader, sans-serif',
               fontWeight: 'bold',
-              background: 'rgba(0,0,0,0.6)',
-              borderRadius: '6px',
-              padding: '2px 8px',
               whiteSpace: 'nowrap',
-              backdropFilter: 'blur(4px)',
+                mixBlendMode: 'difference',
+
             }}
           >
             {index}
@@ -135,15 +132,12 @@ function Connector({
   )
 }
 
-function Model({ children, color = 'white', roughness = 0, ...props }: any) {
+function Model({ children, color = '#111', roughness = 0.85 }: any) {
   const ref = useRef<any>(null)
   const { nodes, materials } = useGLTF('/c-transformed.glb') as any
-  useFrame((state, delta) => {
-    easing.dampC(ref.current.material.color, color, 0.2, delta)
-  })
   return (
     <mesh ref={ref} castShadow receiveShadow scale={10} geometry={nodes.connector.geometry}>
-      <meshStandardMaterial metalness={0.2} roughness={roughness} map={materials.base.map} />
+      <meshStandardMaterial color={color} metalness={0.2} roughness={roughness} map={materials.base.map} />
       {children}
     </mesh>
   )
@@ -190,3 +184,5 @@ export default function Scene() {
     </Canvas>
   )
 }
+
+useGLTF.preload('/c-transformed.glb')
