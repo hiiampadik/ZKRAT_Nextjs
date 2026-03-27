@@ -1,14 +1,27 @@
 // @ts-nocheck
 import * as THREE from 'three'
 import { useRef, useMemo, useState, useCallback, useEffect } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
+import { Canvas, useFrame, useLoader } from '@react-three/fiber'
 import { Environment, Lightformer } from '@react-three/drei'
-import { CapsuleCollider, Physics, RigidBody } from '@react-three/rapier'
+import { ConvexHullCollider, Physics, RigidBody } from '@react-three/rapier'
 import { EffectComposer, N8AO } from '@react-three/postprocessing'
+import { SVGLoader } from 'three/examples/jsm/loaders/SVGLoader'
 import styles from '../styles/Home.module.scss'
 import { ProjectItem } from '../sanity/queries'
 
 const CONNECTOR_SCALE = 6
+const SVG_SHAPE_SCALE = 0.0013 * CONNECTOR_SCALE
+
+const SVG_SHAPES = [
+  'sh1.svg',
+  'sh2.svg',
+  'sh3.svg',
+  'sh4.svg',
+  'sh5.svg',
+  'sh6.svg',
+  'sh7.svg',
+  'sh8.svg',
+]
 
 function useDataUrlTexture(dataUrl: string | null) {
   const [texture, setTexture] = useState<THREE.Texture | null>(null)
@@ -21,6 +34,55 @@ function useDataUrlTexture(dataUrl: string | null) {
     })
   }, [dataUrl])
   return texture
+}
+
+function useSvgGeometry(svgFile: string) {
+  const svgData = useLoader(SVGLoader, `/${svgFile}`)
+  return useMemo(() => {
+    const shapes: THREE.Shape[] = []
+    svgData.paths.forEach((path) => {
+      const s = SVGLoader.createShapes(path)
+      shapes.push(...s)
+    })
+    const geo = new THREE.ExtrudeGeometry(shapes, {
+      depth: 30,
+      bevelEnabled: false,
+    })
+    geo.center()
+    geo.computeBoundingBox()
+    // Remap UVs to 0–1 range based on bounding box so textures display correctly
+    const bb = geo.boundingBox!
+    const uvAttr = geo.getAttribute('uv')
+    if (uvAttr) {
+      for (let i = 0; i < uvAttr.count; i++) {
+        const x = geo.getAttribute('position').getX(i)
+        const y = geo.getAttribute('position').getY(i)
+        uvAttr.setXY(
+          i,
+          (x - bb.min.x) / (bb.max.x - bb.min.x),
+          (y - bb.min.y) / (bb.max.y - bb.min.y)
+        )
+      }
+      uvAttr.needsUpdate = true
+    }
+    geo.computeVertexNormals()
+    return geo
+  }, [svgData])
+}
+
+function useSvgColliderVertices(svgFile: string): Float32Array | null {
+  const geometry = useSvgGeometry(svgFile)
+  return useMemo(() => {
+    if (!geometry) return null
+    const pos = geometry.getAttribute('position')
+    const vertices = new Float32Array(pos.count * 3)
+    for (let i = 0; i < pos.count; i++) {
+      vertices[i * 3] = pos.getX(i) * SVG_SHAPE_SCALE
+      vertices[i * 3 + 1] = pos.getY(i) * SVG_SHAPE_SCALE
+      vertices[i * 3 + 2] = pos.getZ(i) * SVG_SHAPE_SCALE
+    }
+    return vertices
+  }, [geometry])
 }
 
 function Connector({
@@ -59,9 +121,11 @@ function Connector({
       const t = api.current?.translation()
       if (t) {
         const dist = Math.sqrt(t.x * t.x + t.y * t.y + t.z * t.z)
-        // Smooth deceleration: strength proportional to distance, capped to avoid overshoot
-        const strength = Math.min(dist * 0.3, 2.0)
-        api.current.applyImpulse(vec.set(-t.x * strength, -t.y * strength, -t.z * strength))
+        // Dead zone — stop attracting when close to center to prevent vibration
+        if (dist > 1.2) {
+          const strength = Math.min(dist * 0.3, 2.0)
+          api.current.applyImpulse(vec.set(-t.x * strength, -t.y * strength, -t.z * strength))
+        }
       }
     }
 
@@ -121,34 +185,40 @@ function Connector({
     velocity.current.set(0, 0)
   }
 
+  const svgFile = props.svgFile || SVG_SHAPES[0]
+  const svgVertices = useSvgColliderVertices(svgFile)
+
   return (
     <RigidBody linearDamping={12} angularDamping={4} friction={0.5} restitution={0.1} position={pos} ref={api} colliders={false}>
-      <CapsuleCollider args={[0.06 * CONNECTOR_SCALE, 0.05 * CONNECTOR_SCALE]} />
+      {svgVertices && <ConvexHullCollider args={[svgVertices]} />}
       <group
         onPointerOver={(e) => {
           e.stopPropagation()
+          if (anyDragging?.current !== null) return
           setHovered(true)
           onHover?.(index, true)
-          if (clickSound && !anyDragging?.current) {
+          if (clickSound) {
             clickSound.currentTime = 0
             clickSound.play()
           }
         }}
         onPointerOut={() => {
+          if (anyDragging?.current !== null && !dragging.current) return
           setHovered(false)
           onHover?.(index, false)
         }}
         onPointerDown={onPointerDown}
         onPointerUp={onPointerUp}
       >
-        {children ? children : <Model hovered={hovered} {...props} />}
+        {children ? children : <SvgModel hovered={hovered} svgFile={svgFile} coverUrl={props.coverUrl} />}
       </group>
     </RigidBody>
   )
 }
 
-function Model({ hovered = false, coverUrl }: any): any {
+function SvgModel({ hovered = false, coverUrl, svgFile }: any): any {
   const texture = useDataUrlTexture(coverUrl)
+  const geometry = useSvgGeometry(svgFile)
   const matRef = useRef<any>(null)
 
   useEffect(() => {
@@ -159,14 +229,13 @@ function Model({ hovered = false, coverUrl }: any): any {
   }, [texture])
 
   return (
-    <mesh castShadow receiveShadow>
-      <capsuleGeometry args={[0.05 * CONNECTOR_SCALE, 0.12 * CONNECTOR_SCALE, 16, 32]} />
+    <mesh castShadow receiveShadow geometry={geometry} scale={SVG_SHAPE_SCALE}>
       <meshStandardMaterial
         ref={matRef}
         color={'#888'}
-        emissive={hovered ? '#555' : '#000'}
+        emissive={hovered ? '#555' : '#222'}
         metalness={0.2}
-        roughness={0.4}
+        roughness={0.2}
       />
     </mesh>
   )
@@ -175,6 +244,12 @@ function Model({ hovered = false, coverUrl }: any): any {
 export default function Scene({ projects = [], ready = false, onSelectProject }: { projects?: ProjectItem[]; ready?: boolean; onSelectProject?: (project: ProjectItem) => void }) {
   const [labels, setLabels] = useState<Record<number, { x: number; y: number }>>({})
   const [hoveredSet, setHoveredSet] = useState<Set<number>>(new Set())
+
+  // Randomly assign an SVG file to each project
+  const svgAssignments = useMemo(
+    () => projects.map(() => SVG_SHAPES[Math.floor(Math.random() * SVG_SHAPES.length)]),
+    [projects.length]
+  )
 
   const onScreenUpdate = useCallback((index: number, x: number, y: number) => {
     setLabels((prev) => {
@@ -222,7 +297,7 @@ export default function Scene({ projects = [], ready = false, onSelectProject }:
         <spotLight position={[-10, -10, 10]} angle={0.3} penumbra={1} intensity={2} />
         <Physics gravity={[0, 0, 0]}>
           {projects.map((project, i) => (
-            <Connector key={project._id} index={i + 1} coverUrl={project.coverUrl} ready={ready} anyDragging={draggedRef} onScreenUpdate={onScreenUpdate} onHover={onHover} onDragChange={onDragChange} onClick={(index: number) => { const p = projects[index - 1]; if (p) onSelectProject?.(p) }} />
+            <Connector key={project._id} index={i + 1} coverUrl={project.coverUrl} svgFile={svgAssignments[i]} ready={ready} anyDragging={draggedRef} onScreenUpdate={onScreenUpdate} onHover={onHover} onDragChange={onDragChange} onClick={(index: number) => { const p = projects[index - 1]; if (p) onSelectProject?.(p) }} />
           ))}
         </Physics>
         <EffectComposer disableNormalPass multisampling={8}>
