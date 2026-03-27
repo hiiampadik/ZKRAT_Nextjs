@@ -18,11 +18,9 @@ export default function ProjectOverlay({ project, onClose }: ProjectOverlayProps
       <div className={styles.header}>
         <h2>{project.titleEn}</h2>
         <button className={styles.close} onClick={onClose} aria-label="Close"/>
-
       </div>
       <div className={styles.content}>
-        Lorem ipsum
-        {/*<p className={styles.year}>{project.year}</p>*/}
+        <p>{project.year}</p>
       </div>
     </div>
   )

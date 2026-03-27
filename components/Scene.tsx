@@ -10,7 +10,7 @@ import styles from '../styles/Home.module.scss'
 import { ProjectItem } from '../sanity/queries'
 
 const CONNECTOR_SCALE = 6
-const SVG_SHAPE_SCALE = 0.0013 * CONNECTOR_SCALE
+const SVG_SHAPE_SCALE = 0.002 * CONNECTOR_SCALE
 
 const SVG_SHAPES = [
   'sh1.svg',
@@ -49,14 +49,16 @@ function useSvgGeometry(svgFile: string) {
       bevelEnabled: false,
     })
     geo.center()
-    geo.computeBoundingBox()
+    // Split shared vertices so each face has its own normals (prevents light bleeding across edges)
+    const nonIndexed = geo.toNonIndexed()
+    nonIndexed.computeBoundingBox()
     // Remap UVs to 0–1 range based on bounding box so textures display correctly
-    const bb = geo.boundingBox!
-    const uvAttr = geo.getAttribute('uv')
+    const bb = nonIndexed.boundingBox!
+    const uvAttr = nonIndexed.getAttribute('uv')
     if (uvAttr) {
       for (let i = 0; i < uvAttr.count; i++) {
-        const x = geo.getAttribute('position').getX(i)
-        const y = geo.getAttribute('position').getY(i)
+        const x = nonIndexed.getAttribute('position').getX(i)
+        const y = nonIndexed.getAttribute('position').getY(i)
         uvAttr.setXY(
           i,
           (x - bb.min.x) / (bb.max.x - bb.min.x),
@@ -65,8 +67,8 @@ function useSvgGeometry(svgFile: string) {
       }
       uvAttr.needsUpdate = true
     }
-    geo.computeVertexNormals()
-    return geo
+    nonIndexed.computeVertexNormals()
+    return nonIndexed
   }, [svgData])
 }
 
@@ -101,7 +103,17 @@ function Connector({
   ...props
 }: any) {
   const api = useRef<any>(null)
-  const pos = useMemo(() => position || [r(25), r(25), r(10)], [])
+  const pos = useMemo(() => {
+    if (position) return position
+    // Spawn outside the visible viewport (visible area is ~±2.5 units)
+    const minDist = 5
+    let x: number, y: number
+    do {
+      x = r(25)
+      y = r(25)
+    } while (Math.abs(x) < minDist && Math.abs(y) < minDist)
+    return [x, y, r(10)]
+  }, [])
   const [hovered, setHovered] = useState(false)
   const clickSound = useMemo(() => {
     if (typeof window === 'undefined') return null
@@ -234,8 +246,8 @@ function SvgModel({ hovered = false, coverUrl, svgFile }: any): any {
         ref={matRef}
         color={'#888'}
         emissive={hovered ? '#555' : '#222'}
-        metalness={0.2}
-        roughness={0.2}
+        metalness={0.4}
+        roughness={0.3}
       />
     </mesh>
   )
@@ -293,8 +305,9 @@ export default function Scene({ projects = [], ready = false, onSelectProject }:
         }}
       >
         <ambientLight intensity={2} />
-        <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={3} castShadow />
-        <spotLight position={[-10, -10, 10]} angle={0.3} penumbra={1} intensity={2} />
+        <directionalLight position={[0, 0, 10]} intensity={0.6} />
+        <directionalLight position={[3, -2, 8]} intensity={0.35} />
+        <directionalLight position={[-3, 2, 8]} intensity={0.35} />
         <Physics gravity={[0, 0, 0]}>
           {projects.map((project, i) => (
             <Connector key={project._id} index={i + 1} coverUrl={project.coverUrl} svgFile={svgAssignments[i]} ready={ready} anyDragging={draggedRef} onScreenUpdate={onScreenUpdate} onHover={onHover} onDragChange={onDragChange} onClick={(index: number) => { const p = projects[index - 1]; if (p) onSelectProject?.(p) }} />
@@ -305,10 +318,10 @@ export default function Scene({ projects = [], ready = false, onSelectProject }:
         </EffectComposer>
         <Environment resolution={256}>
           <group rotation={[-Math.PI / 3, 0, 1]}>
-            <Lightformer form="circle" intensity={8} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={2} />
-            <Lightformer form="circle" intensity={4} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={2} />
-            <Lightformer form="circle" intensity={4} rotation-y={Math.PI / 2} position={[-5, -1, -1]} scale={2} />
-            <Lightformer form="circle" intensity={4} rotation-y={-Math.PI / 2} position={[10, 1, 0]} scale={8} />
+            <Lightformer form="circle" intensity={2} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={2} />
+            <Lightformer form="circle" intensity={1} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={2} />
+            <Lightformer form="circle" intensity={1} rotation-y={Math.PI / 2} position={[-5, -1, -1]} scale={2} />
+            <Lightformer form="circle" intensity={1} rotation-y={-Math.PI / 2} position={[10, 1, 0]} scale={8} />
           </group>
         </Environment>
       </Canvas>

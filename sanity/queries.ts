@@ -1,4 +1,12 @@
+import imageUrlBuilder from '@sanity/image-url'
 import { sanityClient } from './client'
+
+const builder = imageUrlBuilder(sanityClient)
+
+export interface AboutContent {
+  textCs: Array<{ _key: string; children: Array<{ text: string }> }>
+  textEn: Array<{ _key: string; children: Array<{ text: string }> }>
+}
 
 export interface ProjectItem {
   _id: string
@@ -15,14 +23,12 @@ const PROJECTS_QUERY = `*[_type == "project"] | order(year desc) {
   "titleEn": title[language == "en"][0].value,
   year,
   "slug": slug.current,
-  "coverUrl": cover.asset->url
+  cover
 }`
 
 async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   try {
-    // Append Sanity image transform for smaller size
-    const smallUrl = url + '?w=512&q=80&fm=jpg'
-    const res = await fetch(smallUrl)
+    const res = await fetch(url)
     if (!res.ok) return null
     const buffer = await res.arrayBuffer()
     const base64 = Buffer.from(buffer).toString('base64')
@@ -33,14 +39,28 @@ async function fetchImageAsDataUrl(url: string): Promise<string | null> {
   }
 }
 
+const ABOUT_QUERY = `*[_type == "about"][0] {
+  "textCs": text.cs,
+  "textEn": text.en
+}`
+
+export async function getAbout(): Promise<AboutContent | null> {
+  return await sanityClient.fetch(ABOUT_QUERY)
+}
+
 export async function getProjects(): Promise<ProjectItem[]> {
   const projects = await sanityClient.fetch(PROJECTS_QUERY)
-  // Fetch cover images server-side and convert to data URLs
   const withCovers = await Promise.all(
-    projects.map(async (p: any) => ({
-      ...p,
-      coverUrl: p.coverUrl ? await fetchImageAsDataUrl(p.coverUrl) : null,
-    }))
+    projects.map(async (p: any) => {
+      const coverUrl = p.cover
+        ? builder.image(p.cover).width(512).quality(60).format('jpg').url()
+        : null
+      const { cover, ...rest } = p
+      return {
+        ...rest,
+        coverUrl: coverUrl ? await fetchImageAsDataUrl(coverUrl) : null,
+      }
+    })
   )
   return withCovers
 }
