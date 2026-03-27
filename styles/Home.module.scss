@@ -1,9 +1,4 @@
-
-@keyframes appear {
-  to {
-    opacity: 1;
-  }
-}
+@use 'variables' as *;
 
 .homepageTitle {
   text-align: center;
@@ -13,37 +8,20 @@
   align-items: center;
   justify-content: center;
 
-  animation: appear 1s ease-out forwards;
-  animation-delay: 0.5s;
-  animation-iteration-count: 1;
+  opacity: 0;
+  transition: opacity 1s ease-out;
+  &.fontLoaded {
+    opacity: 1;
+  }
 
-  padding: 12px;
-
-  h1, p, a, .underline {
-    font-size: 10vw;
+  h1 {
+    font-size: calc(20.4vw - 8px);
+    text-shadow: 0 0 0.5vw white;
     margin: 0;
-
     font-family: Rader, sans-serif;
     font-weight: bold;
     font-style: normal;
     font-feature-settings: "ss02";
-  }
-
-  .underline, a {
-    position: relative;
-  }
-
-  .ig{
-    font-feature-settings: "ss11";
-
-  }
-
-  a {
-    @media (hover: hover) {
-      &:hover {
-        opacity: 0.5;
-      }
-    }
   }
 }
 
@@ -76,18 +54,53 @@
   color: white;
   pointer-events: none;
   user-select: none;
-  background: rgba(150, 150, 150, 0.2);
+  background: rgba(100, 100, 100, 0.4);
   border-radius: 16px;
   padding: 20px 30px;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
   animation: popIn 0.25s ease-out forwards;
+  border: 1px solid rgba(150, 150, 150, 0.2);
 
   p {
-    margin: 0;
-    line-height: 1.1em;
-    font-size: 24px;
-    font-family: Rader, sans-serif;
-    font-weight: bold;
+    @include rader-text;
     white-space: nowrap;
+  }
+}
+
+.topBar {
+  position: fixed;
+  z-index: 2000;
+  top: 0;
+  left: 0;
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  font-feature-settings: "ss11";
+
+  opacity: 0;
+  transition: opacity 1s ease-out;
+  &.fontLoaded {
+    opacity: 1;
+  }
+
+  a, button {
+    cursor: pointer;
+    transition: opacity 0.1s ease-out;
+    @media (hover: hover) {
+      &:hover {
+        opacity: 0.5;
+      }
+    }
+  }
+
+  p, a, button {
+    @include rader-text;
+  }
+
+  button {
+    background: none;
+    border: none;
+    padding: 0;
   }
 }

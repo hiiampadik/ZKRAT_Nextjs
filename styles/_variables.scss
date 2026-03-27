@@ -1,0 +1,11 @@
+@mixin rader-text {
+  font-size: 24px;
+  letter-spacing: 0.05em;
+  margin: 0;
+  font-family: Rader, sans-serif;
+  font-weight: bold;
+  font-style: normal;
+  font-feature-settings: "ss02";
+  color: white;
+  line-height: 1em;
+}

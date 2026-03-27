@@ -33,11 +33,20 @@ function Connector({
   onScreenUpdate,
   onHover,
   onDragChange,
+  onClick,
+  ready,
+  anyDragging,
   ...props
 }: any) {
   const api = useRef<any>(null)
-  const pos = useMemo(() => position || [r(10), r(10), r(10)], [])
+  const pos = useMemo(() => position || [r(25), r(25), r(10)], [])
   const [hovered, setHovered] = useState(false)
+  const clickSound = useMemo(() => {
+    if (typeof window === 'undefined') return null
+    const audio = new Audio('/click.mp3')
+    audio.volume = 0.5
+    return audio
+  }, [])
   const dragging = useRef(false)
   const dragStart = useRef(new THREE.Vector2())
   const wasDragged = useRef(false)
@@ -45,13 +54,13 @@ function Connector({
   const worldPos = useMemo(() => new THREE.Vector3(), [])
 
   useFrame(({ mouse, viewport, camera, size }) => {
-    // Attract toward center — skip during drag, weaken near center to avoid jitter
-    if (!dragging.current) {
+    // Attract toward center — skip during drag or before ready, weaken near center to avoid jitter
+    if (!dragging.current && ready) {
       const t = api.current?.translation()
       if (t) {
         const dist = Math.sqrt(t.x * t.x + t.y * t.y + t.z * t.z)
-        // Strong pull far away, fades to near-zero close to center
-        const strength = dist > 2 ? 1.0 : Math.max(0, (dist - 0.5)) * 0.4
+        // Smooth deceleration: strength proportional to distance, capped to avoid overshoot
+        const strength = Math.min(dist * 0.3, 2.0)
         api.current.applyImpulse(vec.set(-t.x * strength, -t.y * strength, -t.z * strength))
       }
     }
@@ -83,6 +92,7 @@ function Connector({
     dragging.current = true
     wasDragged.current = false
     dragStart.current.set(e.clientX, e.clientY)
+    api.current?.wakeUp()
     api.current?.setBodyType(2)
     onDragChange?.(index, true)
   }
@@ -99,7 +109,7 @@ function Connector({
     const dist = Math.sqrt(dx * dx + dy * dy)
 
     if (dist < 5) {
-      console.log(index)
+      onClick?.(index)
     } else {
       const impulseStrength = 15
       api.current?.applyImpulse({
@@ -112,13 +122,17 @@ function Connector({
   }
 
   return (
-    <RigidBody linearDamping={6} angularDamping={4} friction={0.5} restitution={0.1} position={pos} ref={api} colliders={false}>
+    <RigidBody linearDamping={12} angularDamping={4} friction={0.5} restitution={0.1} position={pos} ref={api} colliders={false}>
       <CapsuleCollider args={[0.06 * CONNECTOR_SCALE, 0.05 * CONNECTOR_SCALE]} />
       <group
         onPointerOver={(e) => {
           e.stopPropagation()
           setHovered(true)
           onHover?.(index, true)
+          if (clickSound && !anyDragging?.current) {
+            clickSound.currentTime = 0
+            clickSound.play()
+          }
         }}
         onPointerOut={() => {
           setHovered(false)
@@ -147,12 +161,18 @@ function Model({ hovered = false, coverUrl }: any): any {
   return (
     <mesh castShadow receiveShadow>
       <capsuleGeometry args={[0.05 * CONNECTOR_SCALE, 0.12 * CONNECTOR_SCALE, 16, 32]} />
-      <meshStandardMaterial ref={matRef} color={hovered ? '#fff' : '#999'} metalness={hovered ? 0.7 : 0.2} roughness={hovered ? 0.6 : 0.4} />
+      <meshStandardMaterial
+        ref={matRef}
+        color={'#888'}
+        emissive={hovered ? '#555' : '#000'}
+        metalness={0.2}
+        roughness={0.4}
+      />
     </mesh>
   )
 }
 
-export default function Scene({ projects = [] }: { projects?: ProjectItem[] }) {
+export default function Scene({ projects = [], ready = false, onSelectProject }: { projects?: ProjectItem[]; ready?: boolean; onSelectProject?: (project: ProjectItem) => void }) {
   const [labels, setLabels] = useState<Record<number, { x: number; y: number }>>({})
   const [hoveredSet, setHoveredSet] = useState<Set<number>>(new Set())
 
@@ -175,7 +195,6 @@ export default function Scene({ projects = [] }: { projects?: ProjectItem[] }) {
 
   const draggedRef = useRef<number | null>(null)
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null)
-
   const onDragChange = useCallback((index: number, isDragging: boolean) => {
     draggedRef.current = isDragging ? index : null
     setDraggedIndex(isDragging ? index : null)
@@ -203,7 +222,7 @@ export default function Scene({ projects = [] }: { projects?: ProjectItem[] }) {
         <spotLight position={[-10, -10, 10]} angle={0.3} penumbra={1} intensity={2} />
         <Physics gravity={[0, 0, 0]}>
           {projects.map((project, i) => (
-            <Connector key={project._id} index={i + 1} coverUrl={project.coverUrl} onScreenUpdate={onScreenUpdate} onHover={onHover} onDragChange={onDragChange} />
+            <Connector key={project._id} index={i + 1} coverUrl={project.coverUrl} ready={ready} anyDragging={draggedRef} onScreenUpdate={onScreenUpdate} onHover={onHover} onDragChange={onDragChange} onClick={(index: number) => { const p = projects[index - 1]; if (p) onSelectProject?.(p) }} />
           ))}
         </Physics>
         <EffectComposer disableNormalPass multisampling={8}>
@@ -241,7 +260,6 @@ export default function Scene({ projects = [] }: { projects?: ProjectItem[] }) {
                     WebkitBackdropFilter: 'blur(5px)',
                   }}
               >
-                <p>{project.titleCs}</p>
                 <p>{project.titleEn}</p>
                 <p>{project.year}</p>
               </div>
