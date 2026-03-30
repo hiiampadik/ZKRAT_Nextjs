@@ -26,9 +26,9 @@ export default function AboutOverlay({ about, lang, onClose }: AboutOverlayProps
       </div>
       <div className={styles.content}>
         {blocks?.map((block) => (
-          <p key={block._key}>
+          <div key={block._key}>
             {block.children.map((child) => child.text).join('')}
-          </p>
+          </div>
         ))}
       </div>
     </div>

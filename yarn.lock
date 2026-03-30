@@ -301,6 +301,11 @@
   resolved "https://registry.npmjs.org/@rushstack/eslint-patch/-/eslint-patch-1.2.0.tgz"
   integrity sha512-sXo/qW2/pAcmT43VoRKOJbDOfV3cYpq3szSVfIThQXNt+E4DfKj361vaAt3c88U5tPUxzEswam7GW48PJqtKAg==
 
+"@sanity/asset-utils@^2.3.0":
+  version "2.3.0"
+  resolved "https://registry.npmjs.org/@sanity/asset-utils/-/asset-utils-2.3.0.tgz"
+  integrity sha512-dlEmALjQ5iyQG0O8ZVmkkE3wUYCKfRmiyMvuuGN5SF9buAHxmseBOKJ/Iy2DU/8ef70mtUXlzeCRSlTN/nmZsg==
+
 "@sanity/client@^7.20.0":
   version "7.20.0"
   resolved "https://registry.npmjs.org/@sanity/client/-/client-7.20.0.tgz"
@@ -2565,6 +2570,11 @@ suspend-react@^0.1.3:
   version "0.1.3"
   resolved "https://registry.npmjs.org/suspend-react/-/suspend-react-0.1.3.tgz"
   integrity sha512-aqldKgX9aZqpoDp3e8/BZ8Dm7x1pJl+qI3ZKxDN0i/IQTWUwBx/ManmlVJ3wowqbno6c2bmiIfs+Um6LbsjJyQ==
+
+swiper@^12.1.3:
+  version "12.1.3"
+  resolved "https://registry.npmjs.org/swiper/-/swiper-12.1.3.tgz"
+  integrity sha512-XcWlVmkHFICI4fuoJKgbp8PscDcS4i7pBH8nwJRBi3dpQvhCySwsWRYm4bOf/BzKVWkHOYaFw7qz9uBSrY3oug==
 
 text-table@^0.2.0:
   version "0.2.0"

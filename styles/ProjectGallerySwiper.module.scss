@@ -1,0 +1,17 @@
+@use 'variables' as *;
+
+.swiper {
+  width: 100%;
+
+  img {
+    width: auto;
+    height: 100%;
+    display: block;
+    border-radius: 14px;
+    background: rgba(100, 100, 100, 0.4);
+  }
+}
+
+.slide {
+  width: auto !important;
+}

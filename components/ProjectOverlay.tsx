@@ -1,11 +1,13 @@
+import { useState } from 'react'
 import { ProjectItem } from '../sanity/queries'
 import styles from '../styles/ProjectOverlay.module.scss'
 import ReactPlayer from 'react-player'
 import { InstagramEmbed } from 'react-social-media-embed'
+import ProjectGallerySwiper from './ProjectGallerySwiper'
 
 const t = {
-  en: { year: 'Year:', client: 'Client:', team: 'Team:', tags: 'Tags:', videos: 'Videos:' },
-  cs: { year: 'Rok:',  client: 'Klient:', team: 'Tým:',  tags: 'Tagy:', videos: 'Videa:' },
+  en: { year: 'Year:', client: 'Client:', team: 'Team:', tags: 'Tags:', gallery: 'Gallery', videos: 'Videos' },
+  cs: { year: 'Rok:',  client: 'Klient:', team: 'Tým:',  tags: 'Tagy:', gallery: 'Galerie', videos: 'Videa' },
 }
 
 interface ProjectOverlayProps {
@@ -17,6 +19,7 @@ interface ProjectOverlayProps {
 export default function ProjectOverlay({ project, lang, onClose }: ProjectOverlayProps) {
   const labels = t[lang]
   const title = lang === 'cs' ? project.titleCs : project.titleEn
+  const [videosOpen, setVideosOpen] = useState(false)
 
   return (
       <div
@@ -62,10 +65,23 @@ export default function ProjectOverlay({ project, lang, onClose }: ProjectOverla
           )}
 
 
+          {project.gallery && project.gallery.length > 0 && (
+              <div className={styles.sectionGallery}>
+                <span className={styles.sectionLabel}>{labels.gallery}</span>
+                <ProjectGallerySwiper gallery={project.gallery} />
+              </div>
+          )}
+
           {project.videos && project.videos.length > 0 && (
               <div className={styles.sectionVideos}>
-                <span className={styles.label}>{labels.videos}</span>
-                {project.videos?.map((video) => {
+                <button
+                  className={styles.accordionToggle}
+                  onClick={() => setVideosOpen(o => !o)}
+                >
+                  <span>{labels.videos}</span>
+                  <span className={`${styles.chevron} ${videosOpen ? styles.chevronOpen : ''}`} />
+                </button>
+                {videosOpen && project.videos.map((video) => {
                   if (video.includes('instagram.com')) {
                     return <InstagramEmbed url={video} key={video}/>
                   }

@@ -16,7 +16,7 @@
   top: 65px;
   right: 50%;
   transform: translate(50%, 0);
-  width: 400px;
+  width: 450px;
   max-width: calc(100vw - 40px);
   max-height: calc(100vh - 95px);
   padding: 20px;
@@ -55,14 +55,13 @@
   border-bottom: 1px solid white;
   padding: 10px 0;
 
+  color: white;
+  @include rader-text-regular;
+  letter-spacing: 1.5px;
 
   .section, .sectionVideos {
     display: flex;
     gap: 10px;
-    color: white;
-    font-family: 'Helvetica', sans-serif;
-    @include rader-text-regular;
-    letter-spacing: 1.5px;
   }
 
   .section {
@@ -71,15 +70,76 @@
     }
   }
 
-  .sectionVideos {
+  .sectionGallery, .sectionVideos {
     display: flex;
     flex-direction: column;
     gap: 10px;
     border-top: 1px solid white;
-    padding: 10px 0;
+    padding: 10px 0 0;
+  }
+
+  .sectionLabel {
+    display: block;
+  }
+
+.sectionVideos {
     iframe {
       margin: 0 !important;
     }
+  }
+
+  .accordionToggle {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    color: white;
+    @include rader-text-regular;
+    letter-spacing: 1.5px;
+
+    @media (hover: hover) {
+      &:hover {
+        opacity: 0.5;
+      }
+    }
+  }
+
+  .chevron {
+    position: relative;
+    display: inline-block;
+    width: 16px;
+    height: 8px;
+    flex-shrink: 0;
+    transition: transform 0.25s ease;
+
+    &::before, &::after {
+      content: '';
+      position: absolute;
+      width: 12.7px;
+      height: 0;
+      border-top: 1.5px solid white;
+      top: 0;
+    }
+
+    &::before {
+      left: 0;
+      transform-origin: left top;
+      transform: rotate(45deg);
+    }
+
+    &::after {
+      right: 0;
+      transform-origin: right top;
+      transform: rotate(-45deg);
+    }
+  }
+
+  .chevronOpen {
+    transform: scaleY(-1);
   }
 
   a {

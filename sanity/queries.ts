@@ -29,7 +29,7 @@ export interface ProjectItem {
   team: Array<{ name: string; _key: string }> | null
   tags: Array<{ _id: string; titleCs: string | null; titleEn: string | null }> | null
   videos: string[] | null
-  galleryUrls: Array<string | null> | null
+  gallery: any[] | null
 }
 
 const PROJECTS_QUERY = `*[_type == "project"] | order(year desc) {
@@ -82,20 +82,10 @@ export async function getProjects(): Promise<ProjectItem[]> {
         ? builder.image(p.cover).width(512).quality(60).format('jpg').url()
         : null
 
-      const galleryUrls = p.gallery
-        ? await Promise.all(
-            p.gallery.map(async (img: any) => {
-              const url = builder.image(img).width(1280).quality(80).format('jpg').url()
-              return url ? await fetchImageAsDataUrl(url) : null
-            })
-          )
-        : null
-
-      const { cover, gallery, ...rest } = p
+      const { cover, ...rest } = p
       return {
         ...rest,
         coverUrl: coverUrl ? await fetchImageAsDataUrl(coverUrl) : null,
-        galleryUrls,
       }
     })
   )
