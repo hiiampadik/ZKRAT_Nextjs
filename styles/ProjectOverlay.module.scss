@@ -14,11 +14,11 @@
 .overlay {
   position: fixed;
   top: 65px;
-  bottom: 30px;
   right: 50%;
   transform: translate(50%, 0);
   width: 400px;
   max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 95px);
   padding: 20px;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
   border: 1px solid rgba(150, 150, 150, 0.2);
@@ -31,6 +31,7 @@
 
   border-radius: 14px;
   animation: popIn 0.25s ease-out forwards;
+  overflow-y: scroll;
 }
 
 .header {
@@ -38,7 +39,7 @@
   display: flex;
   justify-content: space-between;
   h2 {
-    @include rader-text;
+    @include rader-text-bold;
   }
 
 }
@@ -46,13 +47,58 @@
 .content {
   width: 100%;
   position: relative;
-  color: white;
-  font-family: 'Helvetica', sans-serif;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 
-  p {
-    @include rader-text;
+  border-top: 1px solid white;
+  border-bottom: 1px solid white;
+  padding: 10px 0;
+
+
+  .section, .sectionVideos {
+    display: flex;
+    gap: 10px;
+    color: white;
+    font-family: 'Helvetica', sans-serif;
+    @include rader-text-regular;
+    letter-spacing: 1.5px;
+  }
+
+  .section {
+    .label {
+      flex: 0 0 60px;
+    }
+  }
+
+  .sectionVideos {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    border-top: 1px solid white;
+    padding: 10px 0;
+    iframe {
+      margin: 0 !important;
+    }
+  }
+
+  a {
+    color: white;
+    position: relative;
+    overflow: visible;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: white;
+
+    @media (hover: hover) {
+      &:hover {
+        text-decoration: none;
+      }
+    }
   }
 }
+
 
 .close {
   position: relative;

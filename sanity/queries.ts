@@ -8,13 +8,28 @@ export interface AboutContent {
   textEn: Array<{ _key: string; children: Array<{ text: string }> }>
 }
 
+export interface RichTextBlock {
+  _key: string
+  _type: string
+  style?: string
+  children: Array<{ _key: string; _type: string; text: string; marks?: string[] }>
+  markDefs?: Array<{ _key: string; _type: string; href?: string }>
+}
+
 export interface ProjectItem {
   _id: string
   titleCs: string | null
   titleEn: string | null
   year: number
-  slug: string
+  slug: string | null
   coverUrl: string | null
+  descriptionCs: RichTextBlock[] | null
+  descriptionEn: RichTextBlock[] | null
+  client: { name?: string; url?: string } | null
+  team: Array<{ name: string; _key: string }> | null
+  tags: Array<{ _id: string; titleCs: string | null; titleEn: string | null }> | null
+  videos: string[] | null
+  galleryUrls: Array<string | null> | null
 }
 
 const PROJECTS_QUERY = `*[_type == "project"] | order(year desc) {
@@ -23,7 +38,18 @@ const PROJECTS_QUERY = `*[_type == "project"] | order(year desc) {
   "titleEn": title[language == "en"][0].value,
   year,
   "slug": slug.current,
-  cover
+  cover,
+  "descriptionCs": description.cs,
+  "descriptionEn": description.en,
+  client,
+  team,
+  "tags": tags[]->{
+    _id,
+    "titleCs": title[language == "cs"][0].value,
+    "titleEn": title[language == "en"][0].value
+  },
+  videos,
+  gallery
 }`
 
 async function fetchImageAsDataUrl(url: string): Promise<string | null> {
@@ -50,17 +76,28 @@ export async function getAbout(): Promise<AboutContent | null> {
 
 export async function getProjects(): Promise<ProjectItem[]> {
   const projects = await sanityClient.fetch(PROJECTS_QUERY)
-  const withCovers = await Promise.all(
+  const withMedia = await Promise.all(
     projects.map(async (p: any) => {
       const coverUrl = p.cover
         ? builder.image(p.cover).width(512).quality(60).format('jpg').url()
         : null
-      const { cover, ...rest } = p
+
+      const galleryUrls = p.gallery
+        ? await Promise.all(
+            p.gallery.map(async (img: any) => {
+              const url = builder.image(img).width(1280).quality(80).format('jpg').url()
+              return url ? await fetchImageAsDataUrl(url) : null
+            })
+          )
+        : null
+
+      const { cover, gallery, ...rest } = p
       return {
         ...rest,
         coverUrl: coverUrl ? await fetchImageAsDataUrl(coverUrl) : null,
+        galleryUrls,
       }
     })
   )
-  return withCovers
+  return withMedia
 }

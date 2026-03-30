@@ -18,6 +18,11 @@ a {
   box-sizing: border-box;
 }
 
+::selection {
+  background-color: #cdcdcd;
+  color: red;
+}
+
 body, main {
   width: 100vw;
   height: 100vh;
@@ -31,4 +36,39 @@ body, main {
   src: url(../public/fonts/PPRader-Bold.woff2);
   font-weight: bold;
   font-style: normal;
+}
+
+@font-face {
+  font-family: Rader;
+  src: url(../public/fonts/PPRader-BoldItalic.woff2);
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Rader;
+  src: url(../public/fonts/PPRader-Regular.woff2);
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Rader;
+  src: url(../public/fonts/PPRader-Italic.woff2);
+  font-weight: 400;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: Rader;
+  src: url(../public/fonts/PPRader-Thin.woff2);
+  font-weight: 100;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: Rader;
+  src: url(../public/fonts/PPRader-ThinItalic.woff2);
+  font-weight: 100;
+  font-style: italic;
 }

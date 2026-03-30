@@ -20,7 +20,6 @@ const SVG_SHAPES = [
   'sh5.svg',
   'sh6.svg',
   'sh7.svg',
-  'sh8.svg',
 ]
 
 function useDataUrlTexture(dataUrl: string | null) {

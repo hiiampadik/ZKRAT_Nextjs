@@ -15,6 +15,21 @@
 export declare const internalGroqTypeReferenceTo: unique symbol
 
 // Source: schema.json
+export type Tag = {
+  _id: string
+  _type: 'tag'
+  _createdAt: string
+  _updatedAt: string
+  _rev: string
+  title: InternationalizedArrayString
+}
+
+export type InternationalizedArrayString = Array<
+  {
+    _key: string
+  } & InternationalizedArrayStringValue
+>
+
 export type SanityImageAssetReference = {
   _ref: string
   _type: 'reference'
@@ -42,12 +57,6 @@ export type About = {
     _key: string
   }>
 }
-
-export type InternationalizedArrayString = Array<
-  {
-    _key: string
-  } & InternationalizedArrayStringValue
->
 
 export type SanityImageCrop = {
   _type: 'sanity.imageCrop'
@@ -84,6 +93,13 @@ export type RichText = Array<{
   _key: string
 }>
 
+export type TagReference = {
+  _ref: string
+  _type: 'reference'
+  _weak?: boolean
+  [internalGroqTypeReferenceTo]?: 'tag'
+}
+
 export type Project = {
   _id: string
   _type: 'project'
@@ -91,9 +107,8 @@ export type Project = {
   _updatedAt: string
   _rev: string
   title: InternationalizedArrayString
-  slug: Slug
   year: number
-  cover: {
+  cover?: {
     asset?: SanityImageAssetReference
     media?: unknown
     hotspot?: SanityImageHotspot
@@ -111,10 +126,15 @@ export type Project = {
   }
   team?: Array<{
     name: string
-    role?: InternationalizedArrayString
     _type: 'teamMember'
     _key: string
   }>
+  tags?: Array<
+    {
+      _key: string
+    } & TagReference
+  >
+  videos?: Array<string>
   gallery?: Array<{
     asset?: SanityImageAssetReference
     media?: unknown
@@ -124,12 +144,6 @@ export type Project = {
     _type: 'image'
     _key: string
   }>
-}
-
-export type Slug = {
-  _type: 'slug'
-  current: string
-  source?: string
 }
 
 export type InternationalizedArrayStringValue = {
@@ -235,15 +249,22 @@ export type Geopoint = {
   alt?: number
 }
 
+export type Slug = {
+  _type: 'slug'
+  current: string
+  source?: string
+}
+
 export type AllSanitySchemaTypes =
+  | Tag
+  | InternationalizedArrayString
   | SanityImageAssetReference
   | About
-  | InternationalizedArrayString
   | SanityImageCrop
   | SanityImageHotspot
   | RichText
+  | TagReference
   | Project
-  | Slug
   | InternationalizedArrayStringValue
   | SanityImagePaletteSwatch
   | SanityImagePalette
@@ -253,3 +274,4 @@ export type AllSanitySchemaTypes =
   | SanityAssetSourceData
   | SanityImageAsset
   | Geopoint
+  | Slug

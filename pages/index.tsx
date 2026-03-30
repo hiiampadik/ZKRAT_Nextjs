@@ -18,7 +18,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   const [projects, about] = await Promise.all([getProjects(), getAbout()]);
   return {
     props: { projects, about },
-    revalidate: 60 * 60 * 24, // Revalidate every hour
+    revalidate: 60 * 60, // Revalidate every hour
   };
 };
 
@@ -71,7 +71,7 @@ export default function Home({ projects, about }: HomeProps) {
         </div>
         <Scene projects={projects} ready={sceneReady} onSelectProject={openProject} />
         {selectedProject && (
-          <ProjectOverlay project={selectedProject} onClose={() => setSelectedProject(null)} />
+          <ProjectOverlay project={selectedProject} lang={lang} onClose={() => setSelectedProject(null)} />
         )}
         {showAbout && about && (
           <AboutOverlay about={about} lang={lang} onClose={() => setShowAbout(false)} />
