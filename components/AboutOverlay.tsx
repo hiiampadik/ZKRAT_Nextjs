@@ -25,6 +25,9 @@ export default function AboutOverlay({ about, lang, onClose }: AboutOverlayProps
         <button className={styles.close} onClick={onClose} aria-label="Close" />
       </div>
       <div className={styles.content}>
+        {/*<img src="/us.svg" alt="Us" style={{ width: '100%', display: 'block' }} />*/}
+        {/*<div style={{ borderBottom: '1px solid white', width: '100%' }} />*/}
+
         {blocks?.map((block) => (
           <div key={block._key}>
             {block.children.map((child) => child.text).join('')}

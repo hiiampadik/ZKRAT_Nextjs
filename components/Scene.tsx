@@ -381,10 +381,10 @@ export default function Scene({projects = [], ready = false, onSelectProject}: {
       </div>
       {/* Zoom controls */}
       <div className={styles.zoomControls}>
-        <button className={styles.zoomBtn} onClick={zoomOut} aria-label="Zoom out">
+        <button className={`${styles.zoomBtn} ${zoomPercent <= ZOOM_PERCENT_MIN ? styles.zoomBtnHidden : ''}`} onClick={zoomOut} aria-label="Zoom out">
           <span className={styles.zoomMinus} />
         </button>
-        <button className={styles.zoomBtn} onClick={zoomIn} aria-label="Zoom in">
+        <button className={`${styles.zoomBtn} ${zoomPercent >= ZOOM_PERCENT_MAX ? styles.zoomBtnHidden : ''}`} onClick={zoomIn} aria-label="Zoom in">
           <span className={styles.zoomPlus} />
         </button>
         <span className={styles.zoomValue}>{zoomPercent}%</span>

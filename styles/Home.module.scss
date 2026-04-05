@@ -148,6 +148,11 @@
   }
 }
 
+.zoomBtnHidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
 .zoomMinus,
 .zoomPlus {
   &::before {
@@ -176,7 +181,6 @@
 .zoomValue {
   @include rader-text-bold;
   color: white;
-  font-size: 0.85em;
   min-width: 3em;
   user-select: none;
 }
