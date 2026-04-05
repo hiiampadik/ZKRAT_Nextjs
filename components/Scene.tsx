@@ -45,10 +45,7 @@ function useSvgGeometry(svgFile: string) {
     })
     const geo = new THREE.ExtrudeGeometry(shapes, {
       depth: 20,
-      bevelEnabled: true,
-      bevelThickness: 2,
-      bevelSize: 2,
-      bevelSegments: 30,
+      bevelEnabled: false,
       // curveSegments: 3
     })
     geo.center()
@@ -247,10 +244,10 @@ function SvgModel({ hovered = false, coverUrl, svgFile }: any): any {
       <mesh castShadow receiveShadow geometry={geometry} scale={SVG_SHAPE_SCALE}>
         <meshStandardMaterial
             ref={matRef}
-            color={'#FFF'}
-            emissive={hovered ? '#555' : '#222'}
-            metalness={0.95}
-            roughness={0.05}
+            color={'#999'}
+            emissive={hovered ? '#555' : '#111'}
+            metalness={0.6}
+            roughness={0.3}
         />
       </mesh>
   )
@@ -322,7 +319,7 @@ export default function Scene({projects = [], ready = false, onSelectProject}: {
         <EffectComposer disableNormalPass multisampling={8}>
           <N8AO distanceFalloff={1} aoRadius={1} intensity={4} />
         </EffectComposer>
-        <Environment  preset={'warehouse'} background={false} environmentIntensity={1} resolution={1024} >
+        <Environment preset={'dawn'} background={false} environmentIntensity={4} resolution={512} >
           <group rotation={[-Math.PI / 3, 0, 1]}>
             <Lightformer form="circle" intensity={2} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={2} />
             <Lightformer form="circle" intensity={1} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={2} />
