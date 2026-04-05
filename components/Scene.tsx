@@ -44,8 +44,12 @@ function useSvgGeometry(svgFile: string) {
       shapes.push(...s)
     })
     const geo = new THREE.ExtrudeGeometry(shapes, {
-      depth: 30,
-      bevelEnabled: false,
+      depth: 20,
+      bevelEnabled: true,
+      bevelThickness: 2,
+      bevelSize: 2,
+      bevelSegments: 30,
+      // curveSegments: 3
     })
     geo.center()
     // Split shared vertices so each face has its own normals (prevents light bleeding across edges)
@@ -240,19 +244,22 @@ function SvgModel({ hovered = false, coverUrl, svgFile }: any): any {
   }, [texture])
 
   return (
-    <mesh castShadow receiveShadow geometry={geometry} scale={SVG_SHAPE_SCALE}>
-      <meshStandardMaterial
-        ref={matRef}
-        color={'#888'}
-        emissive={hovered ? '#555' : '#222'}
-        metalness={0.4}
-        roughness={0.3}
-      />
-    </mesh>
+      <mesh castShadow receiveShadow geometry={geometry} scale={SVG_SHAPE_SCALE}>
+        <meshStandardMaterial
+            ref={matRef}
+            color={'#FFF'}
+            emissive={hovered ? '#555' : '#222'}
+            metalness={0.95}
+            roughness={0.05}
+        />
+      </mesh>
   )
 }
 
-export default function Scene({ projects = [], ready = false, onSelectProject }: { projects?: ProjectItem[]; ready?: boolean; onSelectProject?: (project: ProjectItem) => void }) {
+export default function Scene({projects = [], ready = false, onSelectProject}: {
+  projects?: ProjectItem[];
+  ready?: boolean;
+  onSelectProject?: (project: ProjectItem) => void }) {
   const [labels, setLabels] = useState<Record<number, { x: number; y: number }>>({})
   const [hoveredSet, setHoveredSet] = useState<Set<number>>(new Set())
 
@@ -315,7 +322,7 @@ export default function Scene({ projects = [], ready = false, onSelectProject }:
         <EffectComposer disableNormalPass multisampling={8}>
           <N8AO distanceFalloff={1} aoRadius={1} intensity={4} />
         </EffectComposer>
-        <Environment resolution={256}>
+        <Environment  preset={'warehouse'} background={false} environmentIntensity={1} resolution={1024} >
           <group rotation={[-Math.PI / 3, 0, 1]}>
             <Lightformer form="circle" intensity={2} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={2} />
             <Lightformer form="circle" intensity={1} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={2} />

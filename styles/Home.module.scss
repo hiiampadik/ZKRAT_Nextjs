@@ -104,3 +104,19 @@
     padding: 0;
   }
 }
+
+.topBarIcon {
+  height: 1.6em;
+  width: auto;
+}
+
+.topBarCenter {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.topBarRight {
+  display: flex;
+  gap: 20px;
+}

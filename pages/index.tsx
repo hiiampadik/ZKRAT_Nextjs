@@ -57,17 +57,18 @@ export default function Home({ projects, about }: HomeProps) {
             </h1>
         </div>
         <div className={`${styles.topBar} ${fontLoaded ? styles.fontLoaded : ""}`}>
-            <button onClick={() => setLang(lang === 'en' ? 'cs' : 'en')}>
-                <p>{lang === 'en' ? 'En' : 'Cs'}</p>
-            </button>
-            <button onClick={openAbout}>
+            <img src="/blesk.svg" alt="Blesk" className={styles.topBarIcon} />
+            <button onClick={openAbout} className={styles.topBarCenter}>
                 <p>{lang === 'en' ? 'About us' : 'O nás'}</p>
             </button>
-            <a href="https://www.instagram.com/zkrat.kolektiv/" target="_blank" rel="noopener noreferrer">
-                <p>
-                    Ig
-                </p>
-            </a>
+            <div className={styles.topBarRight}>
+                <button onClick={() => setLang(lang === 'en' ? 'cs' : 'en')}>
+                    <p>{lang === 'en' ? 'En' : 'Cs'}</p>
+                </button>
+                <a href="https://www.instagram.com/zkrat.kolektiv/" target="_blank" rel="noopener noreferrer">
+                    <p>Ig</p>
+                </a>
+            </div>
         </div>
         <Scene projects={projects} ready={sceneReady} onSelectProject={openProject} />
         {selectedProject && (
