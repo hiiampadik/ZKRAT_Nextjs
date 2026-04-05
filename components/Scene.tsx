@@ -253,12 +253,33 @@ function SvgModel({ hovered = false, coverUrl, svgFile }: any): any {
   )
 }
 
+const DEFAULT_ZOOM_Z = 15
+const ZOOM_PERCENT_STEP = 10
+const ZOOM_PERCENT_MIN = 60
+const ZOOM_PERCENT_MAX = 190
+
+function CameraZoom({ targetZ }: { targetZ: number }) {
+  useFrame(({ camera }) => {
+    camera.position.z += (targetZ - camera.position.z) * 0.08
+  })
+  return null
+}
+
 export default function Scene({projects = [], ready = false, onSelectProject}: {
   projects?: ProjectItem[];
   ready?: boolean;
   onSelectProject?: (project: ProjectItem) => void }) {
   const [labels, setLabels] = useState<Record<number, { x: number; y: number }>>({})
   const [hoveredSet, setHoveredSet] = useState<Set<number>>(new Set())
+  const [zoomPercent, setZoomPercent] = useState(100)
+  const zoomZ = DEFAULT_ZOOM_Z / (zoomPercent / 100)
+
+  const zoomIn = useCallback(() => {
+    setZoomPercent((p) => Math.min(ZOOM_PERCENT_MAX, p + ZOOM_PERCENT_STEP))
+  }, [])
+  const zoomOut = useCallback(() => {
+    setZoomPercent((p) => Math.max(ZOOM_PERCENT_MIN, p - ZOOM_PERCENT_STEP))
+  }, [])
 
   // Randomly assign an SVG file to each project
   const svgAssignments = useMemo(
@@ -296,7 +317,7 @@ export default function Scene({projects = [], ready = false, onSelectProject}: {
         shadows
         dpr={[1, 1.5]}
         gl={{ antialias: false, alpha: true }}
-        camera={{ position: [0, 0, 15], fov: 17.5, near: 1, far: 20 }}
+        camera={{ position: [0, 0, 15], fov: 17.5, near: 1, far: 40 }}
         style={{
           position: 'absolute',
           top: 0,
@@ -307,6 +328,7 @@ export default function Scene({projects = [], ready = false, onSelectProject}: {
           background: 'transparent',
         }}
       >
+        <CameraZoom targetZ={zoomZ} />
         <ambientLight intensity={2} />
         <directionalLight position={[0, 0, 10]} intensity={0.6} />
         <directionalLight position={[3, -2, 8]} intensity={0.35} />
@@ -356,6 +378,16 @@ export default function Scene({projects = [], ready = false, onSelectProject}: {
               </div>
           )
         })}
+      </div>
+      {/* Zoom controls */}
+      <div className={styles.zoomControls}>
+        <button className={styles.zoomBtn} onClick={zoomOut} aria-label="Zoom out">
+          <span className={styles.zoomMinus} />
+        </button>
+        <button className={styles.zoomBtn} onClick={zoomIn} aria-label="Zoom in">
+          <span className={styles.zoomPlus} />
+        </button>
+        <span className={styles.zoomValue}>{zoomPercent}%</span>
       </div>
     </>
   )

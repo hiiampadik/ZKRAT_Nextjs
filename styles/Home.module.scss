@@ -120,3 +120,63 @@
   display: flex;
   gap: 20px;
 }
+
+.zoomControls {
+  position: fixed;
+  bottom: 20px;
+  left: 20px;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.zoomBtn {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: opacity 0.1s ease-out;
+
+  @media (hover: hover) {
+    &:hover {
+      opacity: 0.5;
+    }
+  }
+}
+
+.zoomMinus,
+.zoomPlus {
+  &::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    width: 100%;
+    height: 0;
+    border-top: 1.5px solid white;
+  }
+}
+
+.zoomPlus {
+  &::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    height: 100%;
+    width: 0;
+    border-left: 1.5px solid white;
+  }
+}
+
+.zoomValue {
+  @include rader-text-bold;
+  color: white;
+  font-size: 0.85em;
+  min-width: 3em;
+  user-select: none;
+}
