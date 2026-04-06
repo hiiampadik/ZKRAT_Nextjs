@@ -215,18 +215,15 @@
   align-items: center;
   transition: opacity 0.1s ease-out;
 
+  img {
+    height: 25px;
+  }
+
   @media (hover: hover) {
     &:hover {
       opacity: 0.5;
     }
   }
-}
-
-.modeBtnText {
-  @include rader-text-bold;
-  color: white;
-  font-size: 1.4em;
-  line-height: 1;
 }
 
 .canvasColumnMode {

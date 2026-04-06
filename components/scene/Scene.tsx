@@ -28,12 +28,19 @@ export default function Scene({ projects = [], ready = false, onSelectProject }:
 }) {
   const [labels, setLabels] = useState<Record<number, { x: number; y: number }>>({})
   const [hoveredSet, setHoveredSet] = useState<Set<number>>(new Set())
-  const [zoomPercent, setZoomPercent] = useState(100)
+  const [zoomPercent, setZoomPercent] = useState(() => {
+    if (typeof window === 'undefined') return 100
+    const saved = localStorage.getItem('zoomPercent')
+    return saved ? Number(saved) : 100
+  })
   const [muted, setMuted] = useState(() => {
     if (typeof window === 'undefined') return false
     return localStorage.getItem('muted') === 'true'
   })
-  const [sceneMode, setSceneMode] = useState<SceneMode>('magnetic')
+  const [sceneMode, setSceneMode] = useState<SceneMode>(() => {
+    if (typeof window === 'undefined') return 'magnetic'
+    return (localStorage.getItem('sceneMode') as SceneMode) || 'magnetic'
+  })
   const [scrollOffset, setScrollOffset] = useState(0)
 
   const toggleMuted = useCallback(() => {
@@ -46,19 +53,26 @@ export default function Scene({ projects = [], ready = false, onSelectProject }:
   const zoomZ = DEFAULT_ZOOM_Z / (zoomPercent / 100)
 
   const zoomIn = useCallback(() => {
-    setZoomPercent((p) => Math.min(ZOOM_PERCENT_MAX, p + ZOOM_PERCENT_STEP))
+    setZoomPercent((p) => {
+      const next = Math.min(ZOOM_PERCENT_MAX, p + ZOOM_PERCENT_STEP)
+      localStorage.setItem('zoomPercent', String(next))
+      return next
+    })
   }, [])
   const zoomOut = useCallback(() => {
-    setZoomPercent((p) => Math.max(ZOOM_PERCENT_MIN, p - ZOOM_PERCENT_STEP))
+    setZoomPercent((p) => {
+      const next = Math.max(ZOOM_PERCENT_MIN, p - ZOOM_PERCENT_STEP)
+      localStorage.setItem('zoomPercent', String(next))
+      return next
+    })
   }, [])
 
   const toggleSceneMode = useCallback(() => {
     setSceneMode((m) => {
-      if (m === 'magnetic') {
-        setScrollOffset(0)
-        return 'column'
-      }
-      return 'magnetic'
+      const next = m === 'magnetic' ? 'column' : 'magnetic'
+      if (next === 'column') setScrollOffset(0)
+      localStorage.setItem('sceneMode', next)
+      return next as SceneMode
     })
   }, [])
 
@@ -175,7 +189,7 @@ export default function Scene({ projects = [], ready = false, onSelectProject }:
         <EffectComposer disableNormalPass multisampling={8}>
           <N8AO distanceFalloff={1} aoRadius={1} intensity={4} />
         </EffectComposer>
-        <Environment preset={'dawn'} background={false} environmentIntensity={4} resolution={512}>
+        <Environment background={false}>
           <group rotation={[-Math.PI / 3, 0, 1]}>
             <Lightformer form="circle" intensity={2} rotation-x={Math.PI / 2} position={[0, 5, -9]} scale={2} />
             <Lightformer form="circle" intensity={1} rotation-y={Math.PI / 2} position={[-5, 1, -1]} scale={2} />
@@ -216,21 +230,22 @@ export default function Scene({ projects = [], ready = false, onSelectProject }:
       <div className={styles.controls}>
         <button className={`${styles.zoomBtn} ${zoomPercent <= ZOOM_PERCENT_MIN ? styles.zoomBtnHidden : ''}`}
                 onClick={zoomOut} aria-label="Zoom out">
-          <span className={styles.zoomMinus} />
+          <span className={styles.zoomMinus}/>
         </button>
         <button className={`${styles.zoomBtn} ${zoomPercent >= ZOOM_PERCENT_MAX ? styles.zoomBtnHidden : ''}`}
                 onClick={zoomIn} aria-label="Zoom in">
-          <span className={styles.zoomPlus} />
+          <span className={styles.zoomPlus}/>
         </button>
         <span className={styles.zoomValue}>{zoomPercent}%</span>
 
-        <button className={styles.muteBtn} onClick={toggleMuted} aria-label={muted ? 'Unmute' : 'Mute'}>
-          <img src={muted ? '/unmute.svg' : '/mute.svg'} alt="" width={20} height={15} />
+        <button className={styles.modeBtn} onClick={toggleSceneMode} aria-label="Toggle scene mode">
+          <img src={sceneMode === 'magnetic' ? '/list.svg' : '/group.svg'} alt=""/>
         </button>
 
-        <button className={styles.modeBtn} onClick={toggleSceneMode} aria-label="Toggle scene mode">
-          <span className={styles.modeBtnText}>{sceneMode === 'magnetic' ? '≡' : '✦'}</span>
+        <button className={styles.muteBtn} onClick={toggleMuted} aria-label={muted ? 'Unmute' : 'Mute'}>
+          <img src={muted ? '/muted.svg' : '/unmuted.svg'} alt="" width={20} height={15}/>
         </button>
+
       </div>
     </>
   )

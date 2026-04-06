@@ -48,7 +48,7 @@ export default function Connector({
   const wasDragged = useRef(false)
   const velocity = useRef(new THREE.Vector2())
   const worldPos = useMemo(() => new THREE.Vector3(), [])
-  const prevMode = useRef<SceneMode>(sceneMode)
+  const prevMode = useRef<SceneMode | null>(null)
   // Target rotation for column mode — slightly tilted so the face is visible
   const columnRotation = useMemo(() => new THREE.Quaternion().setFromEuler(new THREE.Euler(0.3, 0.2, 0)), [])
 
@@ -56,13 +56,13 @@ export default function Connector({
   useFrame(({ mouse, viewport, camera, size }) => {
     if (!api.current) return
 
-    // Detect mode change and switch body type
+    // Set body type on first frame or when mode changes
     if (prevMode.current !== sceneMode) {
+      api.current.wakeUp()
       if (sceneMode === 'column') {
         api.current.setBodyType(2) // kinematic
       } else {
         api.current.setBodyType(0) // dynamic
-        api.current.wakeUp()
       }
       prevMode.current = sceneMode
     }
@@ -92,8 +92,12 @@ export default function Connector({
         const t = api.current.translation()
         if (t) {
           const dist = Math.sqrt(t.x * t.x + t.y * t.y + t.z * t.z)
-          if (dist > 1.2) {
-            const strength = Math.min(dist * 0.3, 2.0)
+          if (dist > 2.5) {
+            const strength = Math.min(dist * 0.15, 1.0)
+            api.current.applyImpulse(vec.set(-t.x * strength, -t.y * strength, -t.z * strength))
+          } else if (dist > 1.0) {
+            // Gentle pull close to center — avoid overshoot
+            const strength = dist * 0.05
             api.current.applyImpulse(vec.set(-t.x * strength, -t.y * strength, -t.z * strength))
           }
         }

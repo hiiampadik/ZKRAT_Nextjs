@@ -83,9 +83,9 @@ export default function SvgModel({ hovered = false, coverUrl, svgFile }: any): a
     <mesh castShadow receiveShadow geometry={geometry} scale={SVG_SHAPE_SCALE}>
       <meshStandardMaterial
         ref={matRef}
-        color={'#999'}
-        emissive={hovered ? '#555' : '#111'}
-        metalness={0.6}
+        color={'#DDD'}
+        emissive={hovered ? '#555' : '#222'}
+        metalness={0.8}
         roughness={0.3}
       />
     </mesh>
