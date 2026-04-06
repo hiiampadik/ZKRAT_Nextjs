@@ -595,7 +595,7 @@
             }
           }
         },
-        "optional": true
+        "optional": false
       },
       "description": {
         "type": "objectAttribute",
@@ -658,6 +658,13 @@
                   "type": "string"
                 },
                 "optional": false
+              },
+              "external": {
+                "type": "objectAttribute",
+                "value": {
+                  "type": "boolean"
+                },
+                "optional": true
               },
               "_type": {
                 "type": "objectAttribute",

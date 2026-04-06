@@ -60,7 +60,13 @@ export default function ProjectOverlay({ project, lang, onClose }: ProjectOverla
           {project.team && project.team.length > 0 && (
               <div className={styles.section}>
                 <span className={styles.label}>{labels.team}</span>{' '}
-                <span>{project.team.map(m => m.name).join(', ')}</span>
+                <span>{project.team.map((m, i) => (
+                    <span key={m._key}>
+                      {i > 0 && ', '}
+                      {m.name}
+                      {m.external && <i> ({lang === 'cs' ? 'externí' : 'external'})</i>}
+                    </span>
+                ))}</span>
               </div>
           )}
 

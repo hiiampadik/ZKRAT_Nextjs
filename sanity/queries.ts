@@ -26,7 +26,7 @@ export interface ProjectItem {
   descriptionCs: RichTextBlock[] | null
   descriptionEn: RichTextBlock[] | null
   client: { name?: string; url?: string } | null
-  team: Array<{ name: string; _key: string }> | null
+  team: Array<{ name: string; external?: boolean; _key: string }> | null
   tags: Array<{ _id: string; titleCs: string | null; titleEn: string | null }> | null
   videos: string[] | null
   gallery: any[] | null

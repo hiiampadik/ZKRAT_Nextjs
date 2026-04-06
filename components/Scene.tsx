@@ -100,6 +100,7 @@ function Connector({
   onClick,
   ready,
   anyDragging,
+  muted,
   ...props
 }: any) {
   const api = useRef<any>(null)
@@ -209,7 +210,7 @@ function Connector({
           if (anyDragging?.current !== null) return
           setHovered(true)
           onHover?.(index, true)
-          if (clickSound) {
+          if (clickSound && !muted) {
             clickSound.currentTime = 0
             clickSound.play()
           }
@@ -272,6 +273,17 @@ export default function Scene({projects = [], ready = false, onSelectProject}: {
   const [labels, setLabels] = useState<Record<number, { x: number; y: number }>>({})
   const [hoveredSet, setHoveredSet] = useState<Set<number>>(new Set())
   const [zoomPercent, setZoomPercent] = useState(100)
+  const [muted, setMuted] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return localStorage.getItem('muted') === 'true'
+  })
+  const toggleMuted = useCallback(() => {
+    setMuted((m) => {
+      const next = !m
+      localStorage.setItem('muted', String(next))
+      return next
+    })
+  }, [])
   const zoomZ = DEFAULT_ZOOM_Z / (zoomPercent / 100)
 
   const zoomIn = useCallback(() => {
@@ -335,7 +347,7 @@ export default function Scene({projects = [], ready = false, onSelectProject}: {
         <directionalLight position={[-3, 2, 8]} intensity={0.35} />
         <Physics gravity={[0, 0, 0]}>
           {projects.map((project, i) => (
-            <Connector key={project._id} index={i + 1} coverUrl={project.coverUrl} svgFile={svgAssignments[i]} ready={ready} anyDragging={draggedRef} onScreenUpdate={onScreenUpdate} onHover={onHover} onDragChange={onDragChange} onClick={(index: number) => { const p = projects[index - 1]; if (p) onSelectProject?.(p) }} />
+            <Connector key={project._id} index={i + 1} coverUrl={project.coverUrl} svgFile={svgAssignments[i]} ready={ready} anyDragging={draggedRef} muted={muted} onScreenUpdate={onScreenUpdate} onHover={onHover} onDragChange={onDragChange} onClick={(index: number) => { const p = projects[index - 1]; if (p) onSelectProject?.(p) }} />
           ))}
         </Physics>
         <EffectComposer disableNormalPass multisampling={8}>
@@ -380,14 +392,20 @@ export default function Scene({projects = [], ready = false, onSelectProject}: {
         })}
       </div>
       {/* Zoom controls */}
-      <div className={styles.zoomControls}>
-        <button className={`${styles.zoomBtn} ${zoomPercent <= ZOOM_PERCENT_MIN ? styles.zoomBtnHidden : ''}`} onClick={zoomOut} aria-label="Zoom out">
-          <span className={styles.zoomMinus} />
+      <div className={styles.controls}>
+        <button className={`${styles.zoomBtn} ${zoomPercent <= ZOOM_PERCENT_MIN ? styles.zoomBtnHidden : ''}`}
+                onClick={zoomOut} aria-label="Zoom out">
+          <span className={styles.zoomMinus}/>
         </button>
-        <button className={`${styles.zoomBtn} ${zoomPercent >= ZOOM_PERCENT_MAX ? styles.zoomBtnHidden : ''}`} onClick={zoomIn} aria-label="Zoom in">
-          <span className={styles.zoomPlus} />
+        <button className={`${styles.zoomBtn} ${zoomPercent >= ZOOM_PERCENT_MAX ? styles.zoomBtnHidden : ''}`}
+                onClick={zoomIn} aria-label="Zoom in">
+          <span className={styles.zoomPlus}/>
         </button>
         <span className={styles.zoomValue}>{zoomPercent}%</span>
+
+        <button className={styles.muteBtn} onClick={toggleMuted} aria-label={muted ? 'Unmute' : 'Mute'}>
+          <img src={muted ? '/unmute.svg' : '/mute.svg'} alt="" width={20} height={15}/>
+        </button>
       </div>
     </>
   )

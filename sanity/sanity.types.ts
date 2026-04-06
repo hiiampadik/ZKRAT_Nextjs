@@ -108,7 +108,7 @@ export type Project = {
   _rev: string
   title: InternationalizedArrayString
   year: number
-  cover?: {
+  cover: {
     asset?: SanityImageAssetReference
     media?: unknown
     hotspot?: SanityImageHotspot
@@ -126,6 +126,7 @@ export type Project = {
   }
   team?: Array<{
     name: string
+    external?: boolean
     _type: 'teamMember'
     _key: string
   }>

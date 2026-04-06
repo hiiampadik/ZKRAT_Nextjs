@@ -121,7 +121,7 @@
   gap: 20px;
 }
 
-.zoomControls {
+.controls {
   position: fixed;
   bottom: 20px;
   left: 20px;
@@ -129,6 +129,27 @@
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.muteBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  transition: opacity 0.1s ease-out;
+
+  img {
+    width: 50px;
+    height: 25px;
+  }
+
+  @media (hover: hover) {
+    &:hover {
+      opacity: 0.5;
+    }
+  }
 }
 
 .zoomBtn {
