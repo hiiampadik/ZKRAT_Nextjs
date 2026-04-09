@@ -59,7 +59,7 @@
   @include rader-text-regular;
   letter-spacing: 1.5px;
 
-  .section, .sectionVideos {
+  .section, .sectionVideos, .sectionDescription {
     display: flex;
     gap: 10px;
   }
@@ -70,7 +70,7 @@
     }
   }
 
-  .sectionGallery, .sectionVideos {
+  .sectionGallery, .sectionVideos, .sectionDescription {
     display: flex;
     flex-direction: column;
     gap: 10px;
@@ -80,6 +80,10 @@
 
   .sectionLabel {
     display: block;
+  }
+
+  p {
+    margin: 0;
   }
 
 .sectionVideos {

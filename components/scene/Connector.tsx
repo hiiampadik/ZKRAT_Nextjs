@@ -95,7 +95,7 @@ export default function Connector({
           if (dist > 2.5) {
             const strength = Math.min(dist * 0.15, 1.0)
             api.current.applyImpulse(vec.set(-t.x * strength, -t.y * strength, -t.z * strength))
-          } else if (dist > 1.0) {
+          } else if (dist > 1.5) {
             // Gentle pull close to center — avoid overshoot
             const strength = dist * 0.05
             api.current.applyImpulse(vec.set(-t.x * strength, -t.y * strength, -t.z * strength))

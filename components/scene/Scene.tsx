@@ -1,5 +1,4 @@
 // @ts-nocheck
-import * as THREE from 'three'
 import { useRef, useMemo, useState, useCallback, useEffect } from 'react'
 import { Canvas } from '@react-three/fiber'
 import { Environment, Lightformer } from '@react-three/drei'

@@ -70,6 +70,19 @@ export default function ProjectOverlay({ project, lang, onClose }: ProjectOverla
               </div>
           )}
 
+          {(() => {
+            const desc = lang === 'cs' ? project.descriptionCs : project.descriptionEn
+            if (!desc || desc.length === 0) return null
+            return (
+              <div className={styles.sectionDescription}>
+                {desc.map(block => (
+                  <p key={block._key}>
+                    {block.children.map(child => child.text).join('')}
+                  </p>
+                ))}
+              </div>
+            )
+          })()}
 
           {project.gallery && project.gallery.length > 0 && (
               <div className={styles.sectionGallery}>
