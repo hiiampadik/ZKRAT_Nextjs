@@ -12,6 +12,10 @@ export function useDataUrlTexture(dataUrl: string | null) {
     const loader = new THREE.TextureLoader()
     loader.load(dataUrl, (tex) => {
       tex.colorSpace = THREE.SRGBColorSpace
+      tex.anisotropy = 16
+      tex.minFilter = THREE.LinearMipmapLinearFilter
+      tex.magFilter = THREE.LinearFilter
+      tex.generateMipmaps = true
       setTexture(tex)
     })
   }, [dataUrl])

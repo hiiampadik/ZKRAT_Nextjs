@@ -183,7 +183,7 @@ export default function Connector({
           onHover?.(index, true)
           if (clickSound && !muted) {
             clickSound.currentTime = 0
-            clickSound.play()
+            clickSound.play().catch(() => {})
           }
         }}
         onPointerOut={() => {

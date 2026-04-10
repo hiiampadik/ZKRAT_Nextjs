@@ -25,14 +25,22 @@ export default function AboutOverlay({ about, lang, onClose }: AboutOverlayProps
         <button className={styles.close} onClick={onClose} aria-label="Close" />
       </div>
       <div className={styles.content}>
-        {/*<img src="/us.svg" alt="Us" style={{ width: '100%', display: 'block' }} />*/}
-        {/*<div style={{ borderBottom: '1px solid white', width: '100%' }} />*/}
-
         {blocks?.map((block) => (
-          <div key={block._key}>
-            {block.children.map((child) => child.text).join('')}
-          </div>
+            <div key={block._key}>
+              {block.children.map((child) => child.text).join('')}
+            </div>
         ))}
+
+        {/*<div style={{borderBottom: '1px solid white', width: '100%'}}/>*/}
+
+        {/*<div className={styles.instagram}>*/}
+        {/*  <p>IG:</p>*/}
+        {/*  <a href="https://www.instagram.com/sam_cyan/" target="_blank" rel="noopener noreferrer">SA</a>*/}
+        {/*  <a href="https://www.instagram.com/zem.la/" target="_blank" rel="noopener noreferrer">PŽ</a>*/}
+        {/*  <a href="https://www.instagram.com/gustlek/" target="_blank" rel="noopener noreferrer">MA</a>*/}
+        {/*  <a href="https://www.instagram.com/bronislav_musil/" target="_blank" rel="noopener noreferrer">BM</a>*/}
+        {/*  <a href="https://www.instagram.com/mar.kotaro/" target="_blank" rel="noopener noreferrer">MŘ</a>*/}
+        {/*</div>*/}
       </div>
     </div>
   )

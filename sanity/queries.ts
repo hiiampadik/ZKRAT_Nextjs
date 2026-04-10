@@ -79,7 +79,7 @@ export async function getProjects(): Promise<ProjectItem[]> {
   const withMedia = await Promise.all(
     projects.map(async (p: any) => {
       const coverUrl = p.cover
-        ? builder.image(p.cover).width(512).quality(60).format('jpg').url()
+        ? builder.image(p.cover).width(1024).quality(75).format('jpg').url()
         : null
 
       const { cover, ...rest } = p
