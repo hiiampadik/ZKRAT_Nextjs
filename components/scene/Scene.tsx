@@ -93,7 +93,8 @@ export default function Scene({ projects = [], ready = false, onSelectProject }:
     return targets
   }, [sortedIndices, scrollOffset])
 
-  // Scroll handler for column mode
+  // Scroll handler for column mode (wheel + touch)
+  const touchStartY = useRef<number | null>(null)
   useEffect(() => {
     if (sceneMode !== 'column') return
     const maxScroll = (projects.length - 1) * COLUMN_SPACING
@@ -104,8 +105,32 @@ export default function Scene({ projects = [], ready = false, onSelectProject }:
         return Math.max(0, Math.min(maxScroll, next))
       })
     }
+    const onTouchStart = (e: TouchEvent) => {
+      touchStartY.current = e.touches[0].clientY
+    }
+    const onTouchMove = (e: TouchEvent) => {
+      if (touchStartY.current === null) return
+      e.preventDefault()
+      const deltaY = touchStartY.current - e.touches[0].clientY
+      touchStartY.current = e.touches[0].clientY
+      setScrollOffset((prev) => {
+        const next = prev + deltaY * 0.02
+        return Math.max(0, Math.min(maxScroll, next))
+      })
+    }
+    const onTouchEnd = () => {
+      touchStartY.current = null
+    }
     window.addEventListener('wheel', onWheel, { passive: false })
-    return () => window.removeEventListener('wheel', onWheel)
+    window.addEventListener('touchstart', onTouchStart, { passive: true })
+    window.addEventListener('touchmove', onTouchMove, { passive: false })
+    window.addEventListener('touchend', onTouchEnd)
+    return () => {
+      window.removeEventListener('wheel', onWheel)
+      window.removeEventListener('touchstart', onTouchStart)
+      window.removeEventListener('touchmove', onTouchMove)
+      window.removeEventListener('touchend', onTouchEnd)
+    }
   }, [sceneMode, projects.length])
 
   // Randomly assign an SVG file to each project
