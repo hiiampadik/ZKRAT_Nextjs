@@ -23,6 +23,7 @@ export interface ProjectItem {
   year: number
   slug: string | null
   coverUrl: string | null
+  coverSanityUrl: string | null
   descriptionCs: RichTextBlock[] | null
   descriptionEn: RichTextBlock[] | null
   client: { name?: string; url?: string } | null
@@ -86,6 +87,7 @@ export async function getProjects(): Promise<ProjectItem[]> {
       return {
         ...rest,
         coverUrl: coverUrl ? await fetchImageAsDataUrl(coverUrl) : null,
+        coverSanityUrl: coverUrl ?? null,
       }
     })
   )

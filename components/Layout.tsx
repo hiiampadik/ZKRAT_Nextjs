@@ -1,18 +1,31 @@
 import React from 'react';
 import Head from "next/head";
+import { ProjectItem } from '../sanity/queries';
 
 interface LayoutProps {
     children: React.ReactNode;
+    projects?: ProjectItem[];
 }
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, projects }: LayoutProps) {
 
     const title = 'Zkrat Kolektiv'
     const description = "Zkrat is collective of multidisciplinatory artists based in Brno (CZE)"
     const keyWords = "Interactive, Installations, Visualizations, Zkrat, Zkrat Kolektiv, Zkrat PDF, Zkrat Collective, Collective, zkrat.pdf, @zkrat.pdf, @zkrat.kolektiv"
 
     const baseURL = 'https://zkratkolektiv.com/'
-    const imageUlr = 'https://utfs.io/f/6MZjmLIaVkYepGy24sLVGSKbHcY3Bq5LXUmR94g1aCFZEWI0'
+    const imageUlr = baseURL + 'zkrat.jpg'
+
+    const projectGraphItems = (projects ?? [])
+        .filter(p => p.coverSanityUrl)
+        .map(p => ({
+            "@type": "CreativeWork",
+            "name": p.titleEn ?? p.titleCs ?? undefined,
+            "url": p.slug ? baseURL + 'project/' + p.slug : baseURL,
+            "image": p.coverSanityUrl,
+            "dateCreated": p.year?.toString(),
+            "creator": {"@id": baseURL + "#organization"},
+        }))
 
     const jsonLd = {
         '@context': 'https://schema.org',
@@ -31,7 +44,8 @@ export default function Layout({ children }: LayoutProps) {
                 "name": title,
                 "publisher": {"@id":"https://zkratkolektiv.com#organization"},
                 'description': description
-            }
+            },
+            ...projectGraphItems
         ]
     }
 

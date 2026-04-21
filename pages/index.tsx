@@ -50,7 +50,7 @@ export default function Home({ projects, about }: HomeProps) {
   };
 
   return (
-    <Layout>
+    <Layout projects={projects}>
         <div className={`${styles.homepageTitle} ${fontLoaded ? styles.fontLoaded : ""}`}>
             <h1>
                 zkrat.kolektiv
