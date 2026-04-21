@@ -18,7 +18,7 @@ export const getStaticProps: GetStaticProps<HomeProps> = async () => {
   const [projects, about] = await Promise.all([getProjects(), getAbout()]);
   return {
     props: { projects, about },
-    revalidate: 60 * 60 * 24 * 2, // Revalidate every second day
+    ...(process.env.GITHUB_PAGES !== 'true' && { revalidate: 60 * 60 * 24 * 2 }),
   };
 };
 
